@@ -31,12 +31,7 @@
 
 *GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
 
-**Constitution Gates**:
-- [ ] Linux Gaming Compatibility: Will this work on Knulli/Batocera Linux?
-- [ ] Retro Gaming Focus: Does this enhance retro gaming experience?
-- [ ] System Integration: Does this integrate properly with Knulli services?
-- [ ] User Experience Simplicity: Is this TV/Controller-friendly?
-- [ ] Performance & Resource Management: Will this impact gaming performance?
+[Gates determined based on constitution file]
 
 ## Project Structure
 
