@@ -326,7 +326,7 @@ make info               # Show project info
 
 ## 📝 License
 
-GNU General Public License v3.0 - See LICENSE file
+MIT License - See [LICENSE](LICENSE) file
 
 ---
 

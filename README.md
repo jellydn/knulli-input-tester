@@ -2,7 +2,7 @@
 
 A real-time input event display application for Knulli Linux gaming handhelds with sub-100ms latency, multi-controller support, and comprehensive event history logging.
 
-[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![C++17](https://img.shields.io/badge/C%2B%2B-17-blue.svg)]()
 
 ## Features
@@ -302,7 +302,7 @@ Contributions welcome! Please:
 
 ## License
 
-This project is licensed under the GNU General Public License v3.0 - see [LICENSE](LICENSE) file for details.
+This project is licensed under the MIT License - see [LICENSE](LICENSE) file for details.
 
 ## Development Timeline
 

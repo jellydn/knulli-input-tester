@@ -248,7 +248,7 @@ To contribute improvements:
 
 ## License
 
-Knulli Input Tester is licensed under the GPL v3.0.
+Knulli Input Tester is licensed under the MIT License.
 
 ## Support
 
