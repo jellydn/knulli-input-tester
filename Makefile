@@ -44,13 +44,13 @@ help:
 	@echo ""
 
 # Configure CMake if build directory doesn't exist
-$(BUILD_DIR):
+build-dir:
 	@echo "$(BLUE)Creating build directory...$(NC)"
 	@mkdir -p $(BUILD_DIR)
 	@cd $(BUILD_DIR) && $(CMAKE) -DCMAKE_BUILD_TYPE=Release ..
 
 # Build the project
-build: $(BUILD_DIR)
+build: build-dir
 	@echo "$(BLUE)Building $(PROJECT_NAME)...$(NC)"
 	@cd $(BUILD_DIR) && $(CMAKE) --build . $(MAKE_FLAGS)
 	@echo "$(GREEN)✓ Build complete$(NC)"
@@ -60,8 +60,9 @@ rebuild: clean build
 	@echo "$(GREEN)✓ Rebuild complete$(NC)"
 
 # Debug build
-debug: $(BUILD_DIR)
+debug:
 	@echo "$(BLUE)Building $(PROJECT_NAME) with debug symbols...$(NC)"
+	@mkdir -p $(BUILD_DIR)
 	@cd $(BUILD_DIR) && $(CMAKE) -DCMAKE_BUILD_TYPE=Debug ..
 	@cd $(BUILD_DIR) && $(CMAKE) --build . $(MAKE_FLAGS)
 	@echo "$(GREEN)✓ Debug build complete$(NC)"
