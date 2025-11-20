@@ -42,12 +42,29 @@ A real-time input event display application for Knulli Linux gaming handhelds wi
 
 ## Quick Start
 
-### Prerequisites
+### Building with Docker (⭐ Recommended for macOS)
+
+The easiest way to cross-compile for TrimUI Smart Pro:
+
+```bash
+# Build the Docker image (one-time)
+docker build -f Dockerfile.build-arm -t knulli-builder .
+
+# Build the binary
+docker run -v $(pwd):/workspace knulli-builder
+
+# Binary appears at: output/knulli-input-tester
+```
+
+See [CROSS_COMPILE.md](CROSS_COMPILE.md) for more Docker options.
+
+### Prerequisites for Native Build
 
 - C++17 compatible compiler (GCC 7+ or Clang 5+)
 - CMake 3.20+
 - SDL2 development libraries
 - Dear ImGui headers
+- Cross-compiler toolchain (for TrimUI deployment)
 - libevdev development library
 - Google Test (for unit tests)
 - Catch2 (for integration tests)

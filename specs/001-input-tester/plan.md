@@ -7,7 +7,9 @@
 
 ## Summary
 
-Real-time input event display application for Knulli Linux gaming handhelds. The app will capture input from built-in controls and external controllers, display events on screen with <100ms latency, support multiple devices simultaneously, and maintain a scrollable event history for debugging. Technical approach involves direct input device access via Linux input subsystem, lightweight GUI optimized for embedded displays, and integration with Knulli system services.
+Real-time input event display application for Knulli Linux gaming handhelds (TrimUI Smart Pro). The app will capture input from built-in controls and external controllers, display events on screen with <100ms latency, support multiple devices simultaneously, and maintain a scrollable event history for debugging. 
+
+**CRITICAL ARCHITECTURE UPDATE**: Application MUST be cross-compiled for Linux ARM64 (aarch64) ELF binary format, NOT native macOS. Deployed via PortMaster with launcher script coordination with EmulationStation display management. Static linking of SDL2/ImGui dependencies for compatibility across Knulli variants.
 
 ## Technical Context
 
@@ -18,14 +20,22 @@ Real-time input event display application for Knulli Linux gaming handhelds. The
 -->
 
 **Language/Version**: C++17 (selected for performance and Knulli integration)  
-**Primary Dependencies**: Linux input subsystem (evdev), SDL2 + Dear ImGui for GUI  
+**Primary Dependencies**: Linux input subsystem (libevdev), SDL2 + Dear ImGui for GUI (static linked)  
 **Storage**: In-memory circular buffer for event history, optional file logging  
 **Testing**: Google Test + Catch2 hybrid for comprehensive testing coverage  
-**Target Platform**: Knulli Linux (ARM64/x86_64 embedded gaming handhelds)  
+**Target Platform**: TrimUI Smart Pro with Knulli Linux (ARM64 aarch64, ELF binary format)  
+**Build Strategy**: Cross-compilation via aarch64-linux-gnu-gcc toolchain (NOT native macOS build)  
+**Deployment**: PortMaster package manager with launcher script for Knulli  
 **Project Type**: Single native application with GUI  
 **Performance Goals**: <100ms input-to-display latency, <50MB memory usage, 60fps display refresh  
-**Constraints**: Must work on framebuffer-only devices, minimal CPU impact, offline-capable, Knulli system integration  
+**Constraints**: Must work on framebuffer-only devices, minimal CPU impact, offline-capable, Knulli system integration, PortMaster launcher compatibility  
 **Scale/Scope**: Single user application, supports up to 4 controllers, 1000+ events in history buffer
+
+**CRITICAL ARCHITECTURE CHANGES (Post-PR Review)**:
+- Build target: Linux ARM64 ELF (aarch64), not macOS Mach-O
+- Deployment: PortMaster structure (/roms/ports/) with launcher script
+- Dependencies: Static linked SDL2/ImGui for cross-variant compatibility
+- Display: PortMaster launcher handles EmulationStation coordination
 
 ## Constitution Check
 

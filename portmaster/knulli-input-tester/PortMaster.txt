@@ -1,0 +1,55 @@
+Title=Knulli Input Tester
+Description=Real-time input device tester and event visualizer for Knulli OS. Displays live controller input, supports multiple devices, and provides event history logging for debugging and testing game controllers.
+Author=Knulli Community
+License=MIT
+Version=1.0.0
+Tags=utility,system,input,controller,debug
+Requires=libevdev,SDL2
+
+# Application Categories
+Category=Utilities
+SubCategory=System Tools
+
+# Icon and artwork
+Icon=icon.png
+Artwork=artwork.png
+
+# Port information
+PortType=Native Binary
+Architecture=ARM64
+TargetDevice=TrimUI Smart Pro, Knulli OS
+
+# Hardware requirements
+MinMemory=50MB
+MinDiskSpace=2MB
+RequiredGPU=No
+RequiredNetwork=No
+
+# Features
+Features=
+- Real-time input monitoring
+- Multiple controller support
+- Event history with scrolling
+- Button mapping (KNULLI, PlayStation, Xbox)
+- Performance monitoring
+- Configurable display options
+
+# Installation paths
+GamePath=/roms/ports/knulli-input-tester/
+ConfigPath=/roms/ports/knulli-input-tester/config/
+SavePath=/roms/ports/knulli-input-tester/saves/
+
+# Contact and links
+Website=https://github.com/jellydn/knulli-input-tester
+Repository=https://github.com/jellydn/knulli-input-tester
+Issues=https://github.com/jellydn/knulli-input-tester/issues
+Wiki=https://knulli.org
+
+# Compatibility
+Compatible=
+- TrimUI Smart Pro
+- Knulli 0.5+
+- Any ARM64 Linux device with input devices
+
+# Notes
+Notes=First run may take a few seconds to detect controllers. Use the settings menu to configure display and input options.

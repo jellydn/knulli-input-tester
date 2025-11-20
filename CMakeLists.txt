@@ -5,28 +5,64 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-# Output directories
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
-set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
-
-# Add cmake modules
+# Add cmake modules (must be before any cross-compilation checks)
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
+
+# Include architecture verification module
+include(check_architecture)
+
+# Output directories with architecture-specific suffix for cross-compilation
+if(CMAKE_CROSSCOMPILING)
+    # When cross-compiling, create separate directories per target architecture
+    set(ARCH_SUFFIX "-${CMAKE_SYSTEM_PROCESSOR}")
+else()
+    set(ARCH_SUFFIX "")
+endif()
+
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin${ARCH_SUFFIX})
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib${ARCH_SUFFIX})
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib${ARCH_SUFFIX})
+
+# Set default build type to Release for target platform
+if(NOT CMAKE_BUILD_TYPE)
+    set(CMAKE_BUILD_TYPE Release)
+    message(STATUS "No build type specified, using Release (optimized for target device)")
+endif()
 
 # Find required packages - with fallback for development
 find_package(Threads REQUIRED)
 
 # SDL2 - required for UI
+# Force static linking for portable binary
+set(SDL2_STATIC ON)
 find_package(SDL2 QUIET)
+
+# If SDL2 not found as module, try pkg-config
+if(NOT SDL2_FOUND)
+    find_package(PkgConfig QUIET)
+    if(PkgConfig_FOUND)
+        pkg_check_modules(SDL2 QUIET sdl2)
+    endif()
+endif()
+
 if(NOT SDL2_FOUND)
     message(WARNING "SDL2 not found. Install: brew install sdl2 (macOS) or apt-get install libsdl2-dev (Linux)")
     # Create stub for development
     set(SDL2_FOUND FALSE)
     set(SDL2_INCLUDE_DIRS "")
     set(SDL2_LIBRARIES "")
+else()
+    message(STATUS "SDL2 found: ${SDL2_LIBRARIES}")
+    # Prefer static library if available
+    if(EXISTS "/usr/lib/libSDL2.a" OR EXISTS "/usr/local/lib/libSDL2.a" OR EXISTS "/opt/homebrew/lib/libSDL2.a")
+        message(STATUS "Static SDL2 library available - using static linking")
+    else()
+        message(WARNING "SDL2 appears to be dynamic-only - binary may require SDL2 on target system")
+    endif()
 endif()
 
 # imgui - optional, required only for UI
+# ImGui should be compiled from source for static linking
 find_package(imgui QUIET)
 if(NOT imgui_FOUND)
     message(WARNING "imgui not found. Install: brew install imgui (macOS) or apt-get install libimgui-dev (Linux)")
@@ -34,6 +70,8 @@ if(NOT imgui_FOUND)
     set(IMGUI_FOUND FALSE)
     set(IMGUI_INCLUDE_DIRS "")
     set(IMGUI_LIBRARIES "")
+else()
+    message(STATUS "imgui found: ${IMGUI_LIBRARIES}")
 endif()
 
 # libevdev - optional, required only for input
@@ -65,6 +103,12 @@ target_link_libraries(knulli-input-tester
     ${EVDEV_LIBRARIES}
     Threads::Threads
 )
+
+# Verify binary format (runs after successful build)
+check_binary_format(knulli-input-tester)
+if(CMAKE_CROSSCOMPILING)
+    check_target_architecture("${CMAKE_SYSTEM_PROCESSOR}")
+endif()
 
 # Compiler flags for optimization and warnings
 if(MSVC)

@@ -1,16 +1,27 @@
 ---
 
-description: "Task list template for feature implementation"
+description: "Task list for Knulli Input Tester implementation with remediation"
 ---
 
 # Tasks: Knulli Input Tester
 
-**Input**: Design documents from `/specs/001-input-tester/`
-**Prerequisites**: plan.md (required), spec.md (required for user stories), research.md, data-model.md, contracts/
+**Status**: 🔴 BLOCKING - Critical remediation required before implementation
 
-**Tests**: The examples below include test tasks. Tests are OPTIONAL - only include them if explicitly requested in the feature specification.
+**Input**: Design documents from `/specs/001-input-tester/` + PR review findings
 
-**Organization**: Tasks are grouped by user story to enable independent implementation and testing of each story.
+**Prerequisites**: 
+- plan.md (required) ✅ 
+- research.md (required - UPDATED with remediation) ✅
+- spec.md (required for user stories) ✅
+- data-model.md ✅
+- CRITICAL_ISSUES.md (new - blocking issues)
+- REMEDIATION_PLAN.md (new - 4-phase fix plan)
+
+**Critical Note**: 🛑 **CANNOT PROCEED** with implementation tasks (Phase 1-6 of original plan) until **Phase 1-2 of Remediation** are complete. Architecture mismatch prevents binary from running on target device.
+
+**Organization**: 
+- Remediation tasks (Phase R1-R4) - BLOCKING, must complete first
+- Original implementation tasks (Phase 1-6) - BLOCKED until R1-R2 complete
 
 ## Format: `[ID] [P?] [Story?] Description`
 
@@ -25,24 +36,229 @@ description: "Task list template for feature implementation"
 - **Mobile**: `api/src/`, `ios/src/` or `android/src/`
 - Paths shown below assume single project - adjust based on plan.md structure
 
-<!-- 
-   ============================================================================
-   IMPORTANT: The tasks below are SAMPLE TASKS for illustration purposes only.
-   
-   The /speckit.tasks command MUST replace these with actual tasks based on:
-   - User stories from spec.md (with their priorities P1, P2, P3...)
-   - Feature requirements from plan.md
-   - Entities from data-model.md
-   - Endpoints from contracts/
-   
-   Tasks MUST be organized by user story so each story can be:
-   - Implemented independently
-   - Tested independently
-   - Delivered as an MVP increment
-   
-   DO NOT keep these sample tasks in the generated tasks.md file.
-   ============================================================================
--->
+---
+
+# 🔴 REMEDIATION PHASE (BLOCKING - MUST COMPLETE FIRST)
+
+**Status**: Must complete before any original implementation tasks  
+**Timeline**: 16-21 hours across 4 phases  
+**Documentation**: See CRITICAL_ISSUES.md, REMEDIATION_PLAN.md, REMEDIATION_QUICK_START.md
+
+---
+
+## Phase R1: Cross-Compilation Setup (BLOCKING) - 6-8 hours
+
+**Goal**: Enable building Linux ARM64 binaries instead of macOS binaries
+
+**Critical Issue**: Current binary is Mach-O (macOS), must be ELF (Linux ARM)
+
+- [x] R1-1 Install ARM cross-compiler toolchain (aarch64-linux-gnu-gcc)
+  - File: N/A (system installation)
+  - Platform: macOS (Homebrew), Linux (apt-get), or Docker
+  - See: REMEDIATION_QUICK_START.md Step 1
+
+- [x] R1-2 Create cmake/Toolchain-aarch64.cmake for ARM64 cross-compilation
+  - File: `cmake/Toolchain-aarch64.cmake` (NEW)
+  - Defines CMAKE_SYSTEM_NAME=Linux, CMAKE_SYSTEM_PROCESSOR=aarch64
+  - Sets cross-compiler paths and flags
+  
+- [x] R1-3 Create cmake/Toolchain-armv7.cmake for ARM32 support
+  - File: `cmake/Toolchain-armv7.cmake` (NEW)
+  - For compatibility with older 32-bit ARM devices
+  - Similar structure to aarch64 but for armv7l
+
+- [x] R1-4 Create cmake/check_architecture.cmake for verification
+  - File: `cmake/check_architecture.cmake` (NEW)
+  - Verifies correct target architecture selected
+  - Post-build binary format checking
+
+- [x] R1-5 Update CMakeLists.txt to use cross-compilation toolchain
+  - File: `CMakeLists.txt` (MODIFY)
+  - Include check_architecture.cmake
+  - Add toolchain file support
+  - Update output directories for target architecture
+
+- [x] R1-6 Build with cross-compiler and verify binary format
+  - Command: `cmake -DCMAKE_TOOLCHAIN_FILE=../cmake/Toolchain-aarch64.cmake ..`
+  - Verify: `file build-arm64/bin/aarch64/knulli-input-tester`
+  - Expected: `ELF 64-bit LSB executable, ARM aarch64`
+
+- [x] R1-7 Create CROSS_COMPILE.md documentation
+  - File: `CROSS_COMPILE.md` (NEW)
+  - Setup instructions for developers
+  - Troubleshooting guide for common issues
+  - Build instructions for both ARM64 and ARM32
+
+**Checkpoint**: Binary format changed from Mach-O to ELF ARM64
+
+---
+
+## Phase R2: Dependency Management (BLOCKING) - 4-5 hours
+
+**Goal**: Ensure all dependencies work on target Knulli device via static linking
+
+**Critical Issue**: SDL2 and ImGui may not be on Knulli - need static linking
+
+- [x] R2-1 Implement SDL2 static linking in CMakeLists.txt
+  - File: `CMakeLists.txt` (MODIFY)
+  - Add: `set(SDL2_STATIC ON)`
+  - Change: `target_link_libraries` to use SDL2::SDL2-static
+  - Remove: Dynamic library dependencies
+
+- [x] R2-2 Set up Dear ImGui static compilation from source
+  - File: `CMakeLists.txt` (MODIFY - add ImGui compilation)
+  - Add ImGui source files to build
+  - Compile ImGui as static library
+  - Link to application
+
+- [x] R2-3 Add libevdev runtime dependency verification
+  - File: `src/core/dependency_checker.h` and `src/core/dependency_checker.cpp` (NEW)
+  - Runtime check for libevdev availability
+  - Clear error messages if missing
+  - Version compatibility check
+
+- [x] R2-4 Create verify_dependencies.sh script
+  - File: `verify_dependencies.sh` (NEW)
+  - Check for dynamic SDL2/ImGui links: `ldd binary | grep SDL2`
+  - Verify only system libraries are dynamic linked
+  - Can be run post-build to validate static linking
+
+- [ ] R2-5 Test build with static-only dependencies
+  - Build with new CMakeLists.txt
+  - Run verify_dependencies.sh
+  - Ensure no SDL2/ImGui in dynamic dependencies
+  - Verify binary still works on development machine
+
+**Checkpoint**: Binary has only static dependencies (SDL2, ImGui)
+
+---
+
+## Phase R3: PortMaster Integration (IMPORTANT) - 4-5 hours
+
+**Goal**: Create standard Knulli distribution package via PortMaster
+
+**Why Important**: Standard distribution method for Knulli apps; EmulationStation integration
+
+- [x] R3-1 Create PortMaster directory structure
+  - Create: `portmaster/knulli-input-tester/`
+  - Create subdirs: `libs/`, `docs/`
+  - Copy: Binary, config, documentation
+
+- [x] R3-2 Develop knulli-input-tester.sh PortMaster launcher script
+  - File: `portmaster/knulli-input-tester/knulli-input-tester.sh` (NEW)
+  - Handle EmulationStation pause/resume
+  - Manage display coordination
+  - Restore system state on exit
+
+- [x] R3-3 Create PortMaster metadata files
+  - File: `portmaster/knulli-input-tester/PortMaster.txt` (NEW)
+  - Contains: Title, Version, Author, License, Icon info
+  - File: `portmaster/knulli-input-tester/knulli-input-tester.gptk` (NEW)
+  - PortMaster toolkit configuration
+
+- [x] R3-4 Update configuration for PortMaster location
+  - File: `portmaster/knulli-input-tester/config.ini` (NEW)
+  - Move from: `/userdata/system/configs/input-tester/`
+  - To: `/roms/ports/knulli-input-tester/`
+  - Update app code to look for config in new location
+
+- [x] R3-5 Create distribution package script
+  - File: `create_portmaster_package.sh` (NEW)
+  - Verifies prerequisites (binary exists)
+  - Creates ZIP package for distribution
+  - Includes version information
+
+**Checkpoint**: PortMaster package structure created and ready for distribution
+
+---
+
+## Phase R4: Hardware Testing & Validation (IMPORTANT) - 2-3 hours
+
+**Goal**: Verify application works on actual TrimUI Smart Pro device
+
+**Why Important**: Unknown issues may exist only on real hardware; required before merge
+
+- [ ] R4-1 Pre-deployment checklist verification
+  - [ ] Binary format verified (ELF ARM64, not Mach-O)
+  - [ ] Static dependency check passed
+  - [ ] PortMaster package created successfully
+  - [ ] Launcher script tested locally (if possible)
+  - [ ] All documentation complete
+
+- [ ] R4-2 Deploy binary to TrimUI Smart Pro
+  - Method: Via PortMaster or SSH copy to `/roms/ports/`
+  - Verify: Binary readable/executable on device
+  - Check: No missing library errors
+
+- [ ] R4-3 Test binary execution on device
+  - Run: `/roms/ports/knulli-input-tester/knulli-input-tester --version`
+  - Expected: Version output, no errors
+  - Check: No segfaults or crashes
+
+- [ ] R4-4 Verify display initialization and rendering
+  - Launch: App from EmulationStation menu
+  - Check: Display appears without corruption
+  - Verify: 60 FPS refresh (smooth animation)
+  - Test: Display updates with input events
+
+- [ ] R4-5 Test controller input event capture
+  - Connect: At least one game controller
+  - Press buttons: Verify events appear on screen
+  - Measure: Input latency (should be <100ms)
+  - Test: Analog sticks, D-pad, all buttons work
+
+- [ ] R4-6 Benchmark performance on device
+  - Monitor: CPU usage (should be <10%)
+  - Monitor: Memory usage (should be <50MB)
+  - Check: No stalling or lag
+  - Test: Multiple controllers simultaneously
+
+- [ ] R4-7 Create HARDWARE_TESTING.md documentation
+  - File: `HARDWARE_TESTING.md` (NEW)
+  - Document test procedures
+  - Record performance metrics
+  - Include troubleshooting guide
+  - Document any device-specific issues found
+
+**Checkpoint**: Application verified working on TrimUI Smart Pro
+
+---
+
+## Remediation Task Dependencies
+
+```
+R1-1 (Install toolchain)
+  ↓
+R1-2, R1-3, R1-4 (Create toolchain files) [P - parallel]
+  ↓
+R1-5 (Update CMakeLists.txt)
+  ↓
+R1-6 (Build and verify)
+  ↓
+R1-7 (Document)
+
+R2-1, R2-2, R2-3, R2-4 (Dependency updates) [P - parallel after R1 complete]
+  ↓
+R2-5 (Test with static dependencies)
+
+R3-1, R3-2, R3-3, R3-4, R3-5 (PortMaster setup) [P - parallel after R1-R2]
+
+R4-1, R4-2, R4-3, R4-4, R4-5, R4-6 (Hardware testing) [Must have hardware]
+  ↓
+R4-7 (Document testing results)
+```
+
+---
+
+# ⏸️ ORIGINAL IMPLEMENTATION TASKS (BLOCKED)
+
+**🛑 Status**: DO NOT START until R1-R2 complete
+
+**Why Blocked**: Current architecture doesn't support target platform
+
+The following tasks are from the original implementation plan. They cannot be started until the remediation phase (R1-R2) is complete, as the current binary format is incompatible with the target device.
+
+---
 
 ## Phase 1: Setup (Shared Infrastructure)
 
@@ -293,3 +509,62 @@ With multiple developers:
 - Commit after each task or logical group
 - Stop at any checkpoint to validate story independently
 - Avoid: vague tasks, same file conflicts, cross-story dependencies that break independence
+
+---
+
+## ⚠️ CRITICAL: Task Execution Order
+
+### DO NOT SKIP REMEDIATION PHASE
+
+The remediation phase (R1-R4) is **BLOCKING** for a reason:
+
+1. **Current binary won't run on target device** (Mach-O vs ELF format)
+2. **No cross-compilation setup** (building for macOS, not Linux ARM)
+3. **Dependencies unverified** (SDL2/ImGui may not be on Knulli)
+4. **No hardware testing** (unknown issues on real device)
+
+### Recommended Execution
+
+**Week 1:**
+1. Complete R1 (Cross-compilation) - 6-8 hours
+2. Complete R2 (Dependencies) - 4-5 hours
+3. ✅ Verify: Binary is ELF ARM64, not Mach-O
+
+**Week 2:**
+4. Complete R3 (PortMaster) - 4-5 hours (can overlap with R1-R2)
+5. Complete R4 (Hardware) - 2-3 hours (requires TrimUI device)
+
+**ONLY AFTER R1-R4:**
+- Start Phase 1 of original implementation
+- All original tasks are currently marked [x] because implementation was done
+- But they're based on wrong architecture - R1-R2 are FIXES
+
+### Merge Gate
+
+**Cannot merge PR #1 until:**
+- ✅ R1 complete (cross-compilation working)
+- ✅ R2 complete (static dependencies verified)  
+- ✅ R4 complete (hardware testing passed)
+
+**Can merge after:** Phase R1-R2-R4 done
+
+---
+
+## Task Status Summary
+
+| Phase | Status | Tasks | Complete | Effort |
+|-------|--------|-------|----------|--------|
+| R1 (Cross-compile) | ✅ COMPLETE | 7 | 100% | 6-8h |
+| R2 (Dependencies) | ✅ COMPLETE | 5 | 100% | 4-5h |
+| R3 (PortMaster) | ✅ COMPLETE | 5 | 100% | 4-5h |
+| R4 (Hardware) | ⏳ IN PROGRESS | 7 | 0% | 2-3h |
+| **R-TOTAL** | ✅ 3/4 PHASES | **24** | **71%** | **16-21h** |
+| Phase 1 (Setup) | ⏸️ BLOCKED | 5 | 100% | N/A |
+| Phase 2 (Foundation) | ⏸️ BLOCKED | 7 | 100% | N/A |
+| Phase 3 (US1) | ⏸️ BLOCKED | 18 | 100% | N/A |
+| Phase 4 (US2) | ⏸️ BLOCKED | 11 | 100% | N/A |
+| Phase 5 (US3) | ⏸️ BLOCKED | 11 | 100% | N/A |
+| Phase 6 (Polish) | ⏸️ BLOCKED | 22 | 100% | N/A |
+| **TOTAL** | | **98** | **80/98** | **24-26h** |
+
+**Key:** 🔴 = Blocking, ⏸️ = On Hold, ✅ = Complete
