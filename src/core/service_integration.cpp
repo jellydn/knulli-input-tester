@@ -130,7 +130,7 @@ bool ServiceIntegration::applyKnulliSettings() {
     return true;
 }
 
-void ServiceIntegration::registerEventCallback(const std::string& eventName, void (*callback)(const std::string&)) {
+void ServiceIntegration::registerEventCallback(const std::string& eventName, void (*/*callback*/)(const std::string&)) {
     Logger::getInstance().debug("Registering event callback: " + eventName);
     // Implementation would store callbacks in a map for later invocation
 }

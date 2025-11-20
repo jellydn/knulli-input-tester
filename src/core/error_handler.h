@@ -4,6 +4,7 @@
 #include <string>
 #include <functional>
 #include <memory>
+#include <map>
 
 namespace knulli {
 namespace core {

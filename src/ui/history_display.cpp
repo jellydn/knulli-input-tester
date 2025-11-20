@@ -28,10 +28,10 @@ void HistoryDisplayWidget::update(const input::EventHistory& history) {
     filteredEvents = displayedEvents;
 }
 
-void HistoryDisplayWidget::applyFilter(const input::EventFilter& filter) {
-    filteredEvents = filter.apply(const_cast<input::EventHistory&>(
-        *reinterpret_cast<const input::EventHistory*>(nullptr)
-    ));
+void HistoryDisplayWidget::applyFilter(const input::EventFilter& /*filter*/) {
+    // Filter implementation would be applied here
+    // For now, just use displayed events
+    filteredEvents = displayedEvents;
 }
 
 void HistoryDisplayWidget::clearFilter() {

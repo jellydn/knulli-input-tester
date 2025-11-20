@@ -81,16 +81,16 @@ std::string ButtonMapper::getLabel(InputCode code, ButtonScheme scheme) const {
 
 void ButtonMapper::setActiveScheme(ButtonScheme scheme) {
     activeScheme = scheme;
-    core::Logger::getInstance().info("Button scheme changed to: " + 
-        (scheme == ButtonScheme::Knulli ? "Knulli" : 
-         scheme == ButtonScheme::PlayStation ? "PlayStation" : "Xbox"));
+    std::string schemeName = (scheme == ButtonScheme::Knulli ? "Knulli" : 
+                               scheme == ButtonScheme::PlayStation ? "PlayStation" : "Xbox");
+    core::Logger::getInstance().info("Button scheme changed to: " + schemeName);
 }
 
 ButtonScheme ButtonMapper::getActiveScheme() const {
     return activeScheme;
 }
 
-InputCode ButtonMapper::translateCode(InputCode code, ButtonScheme from, ButtonScheme to) const {
+InputCode ButtonMapper::translateCode(InputCode code, ButtonScheme /*from*/, ButtonScheme /*to*/) const {
     // Code identity doesn't change, just labels change
     return code;
 }

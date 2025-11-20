@@ -99,7 +99,7 @@ bool EmulationStationIntegration::isESRunning() {
     return result == 0;
 }
 
-bool EmulationStationIntegration::addMenuEntry(const std::string& name, const std::string& description) {
+bool EmulationStationIntegration::addMenuEntry(const std::string& name, const std::string& /*description*/) {
     Logger::getInstance().info("Adding menu entry: " + name);
     return true;
 }
