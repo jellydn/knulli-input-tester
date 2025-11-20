@@ -1,4 +1,5 @@
 #include "event_history.h"
+#include <mutex>
 
 namespace knulli {
 namespace input {
@@ -48,8 +49,8 @@ std::vector<InputEvent> EventHistory::getEventsForDevice(int deviceId) const {
 }
 
 std::vector<InputEvent> EventHistory::getEventsInTimeRange(
-    std::chrono::milliseconds start,
-    std::chrono::milliseconds end) const {
+    std::chrono::milliseconds /* start */,
+    std::chrono::milliseconds /* end */) const {
     
     std::shared_lock lock(mutex);
     std::vector<InputEvent> result;

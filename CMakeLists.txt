@@ -32,6 +32,45 @@ endif()
 # Find required packages - with fallback for development
 find_package(Threads REQUIRED)
 
+# UUID - required for device identification
+find_package(PkgConfig QUIET)
+if(PkgConfig_FOUND)
+    pkg_check_modules(UUID QUIET uuid)
+    if(UUID_FOUND)
+        # Use full library path from pkg-config
+        set(UUID_LIBRARIES "${UUID_LDFLAGS}")
+    endif()
+endif()
+
+if(NOT UUID_FOUND)
+    # Try to find it manually (for macOS with homebrew)
+    find_library(UUID_LIBRARY NAMES uuid ossp-uuid
+        HINTS
+        /opt/homebrew/Cellar/ossp-uuid/*/lib
+        /usr/local/lib
+        /usr/lib
+    )
+    find_path(UUID_INCLUDE_DIR NAMES uuid.h
+        HINTS
+        /opt/homebrew/Cellar/ossp-uuid/*/include/ossp
+        /usr/local/include/ossp
+        /usr/include/ossp
+        /usr/include
+    )
+    
+    if(UUID_LIBRARY AND UUID_INCLUDE_DIR)
+        set(UUID_FOUND TRUE)
+        set(UUID_LIBRARIES "${UUID_LIBRARY}")
+        set(UUID_INCLUDE_DIRS "${UUID_INCLUDE_DIR}")
+    else()
+        message(FATAL_ERROR "uuid library not found. Install: brew install ossp-uuid (macOS) or apt-get install uuid-dev (Linux)")
+    endif()
+endif()
+
+if(UUID_FOUND)
+    message(STATUS "uuid found: ${UUID_LIBRARIES}")
+endif()
+
 # SDL2 - required for UI
 # Force static linking for portable binary
 set(SDL2_STATIC ON)
@@ -95,12 +134,14 @@ target_include_directories(knulli-input-tester PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/src
     ${SDL2_INCLUDE_DIRS}
     ${IMGUI_INCLUDE_DIRS}
+    ${UUID_INCLUDE_DIRS}
 )
 
 target_link_libraries(knulli-input-tester
     ${SDL2_LIBRARIES}
     ${IMGUI_LIBRARIES}
     ${EVDEV_LIBRARIES}
+    ${UUID_LIBRARIES}
     Threads::Threads
 )
 

@@ -149,7 +149,7 @@ private:
     std::unique_ptr<ui::EventListWidget> eventListWidget;
 };
 
-int main(int argc, char* argv[]) {
+int main(int /* argc */, char* /* argv */[]) {
     try {
         InputTesterApplication app;
         

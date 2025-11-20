@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include <fstream>
+#include <iomanip>
 #include <sys/stat.h>
 #include <dlfcn.h>
 #include <cstring>
@@ -97,7 +98,7 @@ bool DependencyChecker::checkFramebuffer() {
 
 std::vector<DependencyChecker::DependencyInfo> DependencyChecker::getDependencyStatus() {
     std::vector<DependencyInfo> deps;
-    auto& logger = Logger::getInstance();
+    [[maybe_unused]] auto& logger = Logger::getInstance();
 
     // Check libevdev
     DependencyInfo libevdev_info;

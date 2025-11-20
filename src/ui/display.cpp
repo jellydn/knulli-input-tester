@@ -49,7 +49,7 @@ public:
         // Render ImGui content
     }
     
-    void setTitle(const std::string& title) override {
+    void setTitle(const std::string& /* title */) override {
         // Set window title
     }
     

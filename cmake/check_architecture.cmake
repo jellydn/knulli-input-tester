@@ -25,42 +25,25 @@ endfunction()
 # Usage: check_binary_format(target_executable)
 # Example: check_binary_format(knulli-input-tester)
 function(check_binary_format target_name)
-    # Get the full path to the executable
-    get_target_property(target_location ${target_name} LOCATION)
-
-    if(NOT target_location)
-        get_target_property(target_location ${target_name} IMPORTED_LOCATION)
-    endif()
-
-    if(target_location)
-        # Add custom command to check binary format after build
-        add_custom_command(TARGET ${target_name} POST_BUILD
-            COMMAND ${CMAKE_COMMAND} -E echo "Verifying binary format..."
-            COMMAND file "${target_location}" || echo "file command not available"
-            COMMENT "Checking binary format of ${target_name}"
-        )
-    endif()
+    # Add custom command to check binary format after build using generator expression
+    add_custom_command(TARGET ${target_name} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E echo "Verifying binary format..."
+        COMMAND file "$<TARGET_FILE:${target_name}>" || echo "file command not available"
+        COMMENT "Checking binary format of ${target_name}"
+    )
 endfunction()
 
 # Function to verify static linking
 # Checks that only system libraries are dynamically linked
 # Usage: check_static_linking(target_executable)
 function(check_static_linking target_name)
-    get_target_property(target_location ${target_name} LOCATION)
-
-    if(NOT target_location)
-        get_target_property(target_location ${target_name} IMPORTED_LOCATION)
-    endif()
-
-    if(target_location)
-        add_custom_command(TARGET ${target_name} POST_BUILD
-            COMMAND ${CMAKE_COMMAND} -E echo "Checking dynamic dependencies..."
-            COMMAND ldd "${target_location}" 2>/dev/null || echo "ldd command not available (may be cross-compiling)"
-            COMMAND ${CMAKE_COMMAND} -E echo "Verifying no SDL2/ImGui dynamic deps..."
-            COMMAND bash -c "ldd '${target_location}' 2>/dev/null | grep -i 'SDL\\|imgui' && echo 'WARNING: Found SDL/ImGui dynamic links!' || echo 'OK: No SDL/ImGui dynamic dependencies found'"
-            COMMENT "Verifying static linking of ${target_name}"
-        )
-    endif()
+    add_custom_command(TARGET ${target_name} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E echo "Checking dynamic dependencies..."
+        COMMAND ldd "$<TARGET_FILE:${target_name}>" 2>/dev/null || echo "ldd command not available (may be cross-compiling)"
+        COMMAND ${CMAKE_COMMAND} -E echo "Verifying no SDL2/ImGui dynamic deps..."
+        COMMAND bash -c "ldd '$<TARGET_FILE:${target_name}>' 2>/dev/null | grep -i 'SDL\\|imgui' && echo 'WARNING: Found SDL/ImGui dynamic links!' || echo 'OK: No SDL/ImGui dynamic dependencies found'" || true
+        COMMENT "Verifying static linking of ${target_name}"
+    )
 endfunction()
 
 # Function to verify target architecture
