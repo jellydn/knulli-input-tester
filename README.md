@@ -56,7 +56,7 @@ docker run -v $(pwd):/workspace knulli-builder
 # Binary appears at: output/knulli-input-tester
 ```
 
-See [CROSS_COMPILE.md](CROSS_COMPILE.md) for more Docker options.
+See [BUILD_CROSS_COMPILE.md](docs/BUILD_CROSS_COMPILE.md) for more Docker options.
 
 ### Prerequisites for Native Build
 
@@ -174,7 +174,7 @@ max_memory_mb=50
 max_latency_ms=100
 ```
 
-See [QUICKSTART.md](QUICKSTART.md) for more details.
+See [QUICKSTART.md](docs/QUICKSTART.md) for more details.
 
 ## Architecture
 
@@ -304,7 +304,7 @@ make build
 cmake --build build --verbose
 ```
 
-See [QUICKSTART.md](QUICKSTART.md) for more troubleshooting.
+See [QUICKSTART.md](docs/QUICKSTART.md) for more troubleshooting.
 
 ## Contributing
 
@@ -342,7 +342,7 @@ https://github.com/jellydn/knulli-input-tester
 
 ## Support
 
-- 📖 [Documentation](QUICKSTART.md)
+- 📖 [Documentation](docs/QUICKSTART.md)
 - 📋 [Implementation Summary](IMPLEMENTATION_SUMMARY.md)
 - 🐛 [Report Issues](https://github.com/jellydn/knulli-input-tester/issues)
 - 💬 [Knulli Forum](https://forum.knulli.org/)

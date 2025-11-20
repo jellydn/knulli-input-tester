@@ -1,4 +1,4 @@
-.PHONY: help build test install uninstall clean distclean run deploy deploy-help
+.PHONY: help build test install uninstall clean distclean run deploy deploy-help docker-build docker-test docker-dev
 
 # Colors for output
 GREEN := \033[0;32m
@@ -12,13 +12,19 @@ BUILD_DIR := build
 INSTALL_PREFIX := /usr
 CMAKE := cmake
 MAKE_FLAGS := -j$(shell nproc)
+DOCKER_IMAGE := knulli-builder
+USE_DOCKER ?= 1
 
 help:
 	@echo "$(BLUE)$(PROJECT_NAME) - Makefile Commands$(NC)"
 	@echo ""
-	@echo "$(GREEN)Build & Compile:$(NC)"
-	@echo "  make build           Build the project"
-	@echo "  make rebuild         Clean and rebuild"
+	@echo "$(GREEN)Build & Compile (Native):$(NC)"
+	@echo "  make build           Build the project (native)"
+	@echo "  make rebuild         Clean and rebuild (native)"
+	@echo ""
+	@echo "$(GREEN)Build & Compile (Docker):$(NC)"
+	@echo "  make docker-build    Build for ARM64 in Docker"
+	@echo "  make docker-dev      Full dev cycle in Docker (build + test)"
 	@echo ""
 	@echo "$(GREEN)Testing:$(NC)"
 	@echo "  make test            Run all tests"
@@ -41,6 +47,7 @@ help:
 	@echo "$(GREEN)Development:$(NC)"
 	@echo "  make debug           Build with debug symbols"
 	@echo "  make coverage        Build with coverage reporting"
+	@echo "  make dev             Full dev cycle (distclean + build + test)"
 	@echo ""
 	@echo "$(GREEN)Deployment:$(NC)"
 	@echo "  make deploy IP=<ip>  Deploy to Knulli device (e.g., make deploy IP=192.168.1.100)"
@@ -179,6 +186,25 @@ info:
 	@echo ""
 	@echo "$(BLUE)Test Files:$(NC)"
 	@find tests -name "*.cpp" | wc -l | xargs echo "  Total test files:"
+
+# Docker-based build for ARM64
+docker-image:
+	@echo "$(BLUE)Building Docker image: $(DOCKER_IMAGE)...$(NC)"
+	@docker build -f Dockerfile.build-arm -t $(DOCKER_IMAGE) .
+	@echo "$(GREEN)✓ Docker image built$(NC)"
+
+# Docker-based build (ARM64)
+docker-build: docker-image
+	@echo "$(BLUE)Building ARM64 binary in Docker...$(NC)"
+	@docker run --rm -v $(PWD):/workspace $(DOCKER_IMAGE)
+	@echo "$(GREEN)✓ Docker build complete$(NC)"
+	@echo "Binary location: build-arm64/bin/aarch64/knulli-input-tester"
+
+# Docker-based dev cycle
+docker-dev: docker-image
+	@echo "$(BLUE)Running development cycle in Docker...$(NC)"
+	@docker run --rm -v $(PWD):/workspace $(DOCKER_IMAGE)
+	@echo "$(GREEN)✓ Docker dev cycle complete$(NC)"
 
 # Development workflow
 dev: distclean
