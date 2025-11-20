@@ -1,4 +1,4 @@
-.PHONY: help build test install uninstall clean distclean run
+.PHONY: help build test install uninstall clean distclean run deploy deploy-help
 
 # Colors for output
 GREEN := \033[0;32m
@@ -41,6 +41,10 @@ help:
 	@echo "$(GREEN)Development:$(NC)"
 	@echo "  make debug           Build with debug symbols"
 	@echo "  make coverage        Build with coverage reporting"
+	@echo ""
+	@echo "$(GREEN)Deployment:$(NC)"
+	@echo "  make deploy IP=<ip>  Deploy to Knulli device (e.g., make deploy IP=192.168.1.100)"
+	@echo "  make deploy-help     Show deployment help"
 	@echo ""
 
 # Configure CMake if build directory doesn't exist
@@ -190,6 +194,26 @@ ci: distclean
 	@make build
 	@make test-verbose
 	@echo "$(GREEN)✓ CI pipeline passed$(NC)"
+
+# Deployment to Knulli device
+deploy: build
+	@if [ -z "$(IP)" ]; then \
+		echo "$(YELLOW)Error: IP address required$(NC)"; \
+		echo "Usage: make deploy IP=192.168.1.100"; \
+		exit 1; \
+	fi
+	@echo "$(BLUE)Deploying to $(IP)...$(NC)"
+	@if [ -x "./deploy.sh" ]; then \
+		./deploy.sh $(IP) root; \
+	else \
+		echo "$(RED)deploy.sh not found or not executable$(NC)"; \
+		echo "Run: chmod +x deploy.sh"; \
+		exit 1; \
+	fi
+
+# Deploy help
+deploy-help:
+	@cat DEPLOY_QUICK_START.md || echo "DEPLOY_QUICK_START.md not found"
 
 # Default target
 .DEFAULT_GOAL := help
