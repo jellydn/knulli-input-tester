@@ -10,17 +10,18 @@ Knulli Input Tester is a real-time input event display application for Knulli Li
 
 ```bash
 # Clone the repository
-git clone https://github.com/knulli-project/input-tester.git
-cd 2025-11-19-input-tester
+git clone https://github.com/jellydn/knulli-input-tester.git
+cd knulli-input-tester
 
-# Create build directory
+# Build using Makefile (recommended)
+make build
+make test
+sudo make install
+
+# Or build manually
 mkdir build && cd build
-
-# Configure and build
 cmake ..
 cmake --build . -j$(nproc)
-
-# Install (requires root)
 sudo cmake --install .
 ```
 
@@ -252,5 +253,10 @@ Knulli Input Tester is licensed under the GPL v3.0.
 ## Support
 
 For issues and questions:
-- GitHub Issues: https://github.com/knulli-project/input-tester/issues
+- GitHub Issues: https://github.com/jellydn/knulli-input-tester/issues
+- GitHub Repository: https://github.com/jellydn/knulli-input-tester
 - Knulli Forum: https://forum.knulli.org/
+
+## Author
+
+Created by [@jellydn](https://github.com/jellydn)
