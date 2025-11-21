@@ -1,0 +1,20 @@
+[Unit]
+Description=Knulli Input Tester - Real-time Input Event Display
+Documentation=man:knulli-input-tester(1)
+After=network.target
+Wants=display-manager.service
+
+[Service]
+Type=simple
+User=root
+Group=root
+ExecStart=/usr/bin/knulli-input-tester
+Restart=on-failure
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+Environment="SDL_VIDEODRIVER=fbcon"
+
+[Install]
+WantedBy=multi-user.target
+Alias=knulli-input-tester.service

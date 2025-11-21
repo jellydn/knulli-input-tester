@@ -1,0 +1,86 @@
+# Cross-compilation builder for ARM64 Linux
+# Builds Knulli Input Tester binary for TrimUI Smart Pro (Allwinner A133P)
+#
+# Usage:
+#   docker build -f Dockerfile.build-arm -t knulli-builder .
+#   docker run -v $(pwd):/workspace knulli-builder
+#
+# Binary output: build-arm64/bin/aarch64/knulli-input-tester
+
+FROM ubuntu:22.04
+
+LABEL maintainer="Knulli Community"
+LABEL description="Cross-compilation environment for Knulli Input Tester (ARM64)"
+LABEL version="1.0"
+
+# Set working directory
+WORKDIR /workspace
+
+# Install build tools and ARM cross-compiler toolchain
+RUN dpkg --add-architecture arm64 && \
+    apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    cmake \
+    git \
+    ca-certificates \
+    gcc-aarch64-linux-gnu \
+    g++-aarch64-linux-gnu \
+    binutils-aarch64-linux-gnu \
+    pkg-config \
+    libsdl2-dev:arm64 \
+    libevdev-dev:arm64 \
+    uuid-dev:arm64 \
+    file \
+    && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+
+# Set up cross-compilation environment
+ENV CC=aarch64-linux-gnu-gcc \
+    CXX=aarch64-linux-gnu-g++ \
+    AR=aarch64-linux-gnu-ar \
+    RANLIB=aarch64-linux-gnu-ranlib \
+    STRIP=aarch64-linux-gnu-strip \
+    CFLAGS="-march=armv8-a -mtune=generic -O3" \
+    CXXFLAGS="-march=armv8-a -mtune=generic -O3"
+
+# Verify cross-compiler is available
+RUN which aarch64-linux-gnu-gcc && aarch64-linux-gnu-gcc --version && echo "✓ Cross-compiler ready"
+
+# Copy source code
+COPY CMakeLists.txt /workspace/
+COPY cmake/ /workspace/cmake/
+COPY src/ /workspace/src/
+COPY specs/ /workspace/specs/
+
+# Create build directory and configure
+RUN mkdir -p build-arm64 && \
+    cd build-arm64 && \
+    cmake -DCMAKE_TOOLCHAIN_FILE=../cmake/Toolchain-aarch64.cmake \
+          -DCMAKE_BUILD_TYPE=Release \
+          -DCMAKE_VERBOSE_MAKEFILE=ON \
+          .. && \
+    echo "✓ CMake configuration complete"
+
+# Build the application
+RUN cd /workspace/build-arm64 && \
+    cmake --build . --config Release --parallel $(nproc) && \
+    echo "✓ Build complete"
+
+# Verify binary format
+RUN file /workspace/build-arm64/bin-aarch64/knulli-input-tester && \
+    /workspace/build-arm64/bin-aarch64/knulli-input-tester --version 2>/dev/null || true
+
+# Create output directory for easier extraction
+RUN mkdir -p /workspace/output && \
+    cp /workspace/build-arm64/bin-aarch64/knulli-input-tester /workspace/output/ && \
+    file /workspace/output/knulli-input-tester
+
+# Set default working directory for interactive use
+WORKDIR /workspace
+
+# Default command: show build results
+CMD ["bash", "-c", "echo ''; echo '=== Build Complete ==='; echo ''; \
+    echo 'Binary:'; file ./build-arm64/bin-aarch64/knulli-input-tester; echo ''; \
+    echo 'Size:'; du -h ./build-arm64/bin-aarch64/knulli-input-tester; echo ''; \
+    echo 'Output copied to: ./output/knulli-input-tester'; echo ''; \
+    echo 'To use this binary:'; echo '  1. Copy to TrimUI: scp output/knulli-input-tester user@device:/roms/ports/knulli-input-tester/'; echo '  2. Run on device: ssh user@device /roms/ports/knulli-input-tester/knulli-input-tester --version'; echo ''; \
+    bash"]

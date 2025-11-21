@@ -1,0 +1,110 @@
+# Build directories
+build/
+bin/
+obj/
+out/
+cmake-build/
+CMakeFiles/
+CMakeCache.txt
+
+# Compiled output
+*.o
+*.a
+*.so
+*.dll
+*.exe
+*.out
+*.app
+*.elf
+*.hex
+*.bin
+
+# IDE files
+.vscode/
+.idea/
+*.vcxproj*
+*.vcxproj*
+*.sln
+*.user
+*.suo
+*.swp
+*.swo
+
+# C++ specific
+*.h.gch
+*.pch
+*.tmp
+*.temp
+*.cache
+*.ilk
+*.pdb
+*.pgc
+*.pgd
+
+# Dependencies
+node_modules/
+vendor/
+external/
+third_party/
+
+# Logs and temporary files
+*.log
+*.log.*
+logs/
+*.tmp
+*.temp
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+
+# Configuration and environment files
+.env
+.env.*
+config.ini
+*.conf
+settings.json
+
+# Test outputs
+test_results/
+coverage/
+*.gcov
+*.gcda
+*.gcno
+lcov.info
+
+# Documentation build
+docs/_build/
+docs/.doxygen/
+
+# Package files
+*.deb
+*.rpm
+*.tar.gz
+*.zip
+*.7z
+
+# Knulli/Batocera specific
+userdata/
+system/
+*.pak
+*.fs
+
+# Performance profiling
+*.prof
+*.profraw
+*.perf
+callgrind.out.*
+
+# Sanitizer outputs
+*.sanitize
+*.asan
+*.tsan
+*.ubsan
+
+# Backup files
+*.bak
+*.backup
+*.old
+*.orig
