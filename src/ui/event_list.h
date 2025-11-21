@@ -32,6 +32,8 @@ public:
     void setScrollPosition(int pos);
 
 private:
+    const char* getCodeName(knulli::input::InputCode code);
+    
     std::vector<knulli::input::InputEvent> displayedEvents;
     size_t maxVisibleItems;
     int scrollPosition;
